@@ -3,10 +3,13 @@ import joblib
 from sklearn.ensemble import GradientBoostingClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
+
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+# from sklearn.feature_extraction import extract_features
 
 from model import preprocess_data
 
@@ -66,8 +69,8 @@ def train_and_save_model(file_path):
     df = pd.read_csv(file_path, delimiter=';')
 
     processed_data = preprocess_data(df)
-    train_set, test_set = train_test_split_data(processed_data)
-    train_set, test_set = extract_features(train_set, test_set)
+    train_set, test_set = train_test_split(processed_data)
+    # train_set, test_set = extract_features(train_set, test_set)
 
     numerical_columns = test_set.select_dtypes(
         include=['int64', 'float64']).columns
@@ -101,8 +104,10 @@ def train_and_save_model(file_path):
     joblib.dump(pipeline, output_path)
     joblib.dump(X_train.columns, '../data/model_features.pkl')
     print(f"Best model '{best_model_name}' saved to {output_path}")
+    return f"Best model '{best_model_name}' saved to {output_path}"
 
 
 if __name__ == "__main__":
     file_path = "../data/train.csv"
+    file_path = "/home/franzele/Desktop/univ_lille/m2s1/bg/tp2/train.csv"
     train_and_save_model(file_path)
