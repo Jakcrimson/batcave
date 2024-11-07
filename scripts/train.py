@@ -44,8 +44,8 @@ def evaluate_models(models, X_train, y_train, X_test, y_test):
 def train_and_save_model(file_path):
     df = pd.read_csv(file_path, delimiter=';')
     processed_data = preprocess_data(df)
-    train_set, test_set = train_test_split_data(processed_data)
-    train_set, test_set = extract_features(train_set, test_set)
+    train_set, test_set = train_test_split(processed_data)
+    # train_set, test_set = extract_features(train_set, test_set)
 
     numerical_columns = test_set.select_dtypes(include=['int64', 'float64']).columns
     X_train = train_set.loc[:, numerical_columns].drop(columns=['Target', 'ID'])
@@ -68,6 +68,7 @@ def train_and_save_model(file_path):
     joblib.dump(pipeline, output_path)
     joblib.dump(X_train.columns, 'data/model_features.pkl')
     print(f"Best model '{best_model_name}' saved to {output_path}")
+    return f"Best model '{best_model_name}' saved to {output_path}"
 
 if __name__ == "__main__":
     file_path = "../data/train.csv"
