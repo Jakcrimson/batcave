@@ -18,6 +18,57 @@ MODEL_CONFIGS = [
     ('xgb', XGBClassifier(n_estimators=100, random_state=42)),
 ]
 
+def use_best_model(review_content, review_title, stars, product):
+    # vérification si le modèle existe
+    if not os.path.exists("data/trained_model.pkl"):
+        return False
+    
+    # prise et standardisation des données
+    df = pd.DataFrame({"ID": 0, "review_content": review_content, "review_title": review_title, "review_stars": stars, "product": product, "Target": -1}, index=[0])
+    df = preprocess_data(df)
+    numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns
+    X = df.loc[:, numerical_columns].drop(columns=['Target', 'ID'])
+
+    # extraction du modèle
+    model = joblib.load("data/trained_model.pkl")
+
+    # prediction
+    y = model.predict(X)
+
+    return y.item()
+
+def test_best_model(file_path):
+    # vérification si le modèle existe
+    if not os.path.exists("data/trained_model.pkl"):
+        return False
+    
+    # extraction des données
+    df = pd.read_csv(file_path, delimiter=';')
+    df = preprocess_data(df)
+    numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns
+    X_test = df.loc[:, numerical_columns].drop(columns=['Target', 'ID'])
+    y_test = df['Target']
+
+    # standardisation des données
+    std_scaler = StandardScaler().fit(X_test)
+
+    # extraction du modèle
+    model = joblib.load("data/trained_model.pkl")
+
+    # initialisation de la pipeline
+    pipeline = Pipeline([
+        ('scaler', std_scaler),
+        ('model', model)
+    ])
+    # on pas besoin de faire le fit comme il a déjà été fait
+
+    # test
+    y_pred_proba = pipeline.predict_proba(X_test)[:, 1]
+    auc_score = roc_auc_score(y_test, y_pred_proba)
+
+    return auc_score
+
+
 def evaluate_model(model_name, model, X_train, y_train, X_test, y_test):
     pipeline = Pipeline([
         ('scaler', StandardScaler()),
@@ -44,7 +95,7 @@ def evaluate_models(models, X_train, y_train, X_test, y_test):
 def train_and_save_model(file_path):
     df = pd.read_csv(file_path, delimiter=';')
     processed_data = preprocess_data(df)
-    train_set, test_set = train_test_split(processed_data)
+    train_set, test_set = train_test_split_data(processed_data)
     # train_set, test_set = extract_features(train_set, test_set)
 
     numerical_columns = test_set.select_dtypes(include=['int64', 'float64']).columns
@@ -72,4 +123,5 @@ def train_and_save_model(file_path):
 
 if __name__ == "__main__":
     file_path = "../data/train.csv"
-    train_and_save_model(file_path)
+    # train_and_save_model(file_path)
+    # test_best_model(file_path)
