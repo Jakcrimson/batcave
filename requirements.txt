@@ -1,0 +1,6 @@
+fastapi[standard]
+xgboost
+lightgbm
+nltk
+pydantic
+uvicorn
