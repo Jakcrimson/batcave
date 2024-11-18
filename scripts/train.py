@@ -21,6 +21,7 @@ MODEL_CONFIGS = [
 def use_best_model(review_content, review_title, stars, product):
     # vérification si le modèle existe
     if not os.path.exists("data/trained_model.pkl"):
+        print("il existe pas ptn")
         return False
     
     # prise et standardisation des données

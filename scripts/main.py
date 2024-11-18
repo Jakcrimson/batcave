@@ -67,8 +67,9 @@ async def predict_model(request: UseRequest):
                                           request.review_title,
                                           request.review_stars,
                                           request.product)
+        print(return_str)
 
-        if not return_str:
+        if return_str is None:
             raise HTTPException(status_code=500, detail="Model not found (have you trained it?)")
 
         return {"Prediction": return_str}
